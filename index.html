@@ -1,0 +1,311 @@
+<!DOCTYPE html>  <html lang="id">    <head>    
+  <meta charset="UTF-8" />    
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>    
+  <title>Xinz Payment</title>    
+  <style>    
+    * { box-sizing: border-box; }    
+    body {    
+      margin: 0;    
+      font-family: 'Segoe UI', sans-serif;    
+      background: #0f0f0f;    
+      color: #fff;    
+      overflow-y: auto;    
+      height: 100vh;    
+    }    
+    .lights {    
+      position: fixed;    
+      width: 100%;    
+      height: 100%;    
+      top: 0; left: 0;    
+      z-index: 0;    
+      overflow: hidden;    
+    }    
+    .light {    
+      position: absolute;    
+      width: 8px;    
+      height: 8px;    
+      background: rgba(0, 255, 200, 0.8);    
+      box-shadow: 0 0 10px #00ffe0, 0 0 20px #00ffe0;    
+      border-radius: 50%;    
+      animation: blink 2s infinite ease-in-out alternate;    
+    }    
+    @keyframes blink {    
+      from { transform: translateY(0px) scale(1); opacity: 1; }    
+      to { transform: translateY(30px) scale(1.5); opacity: 0.2; }    
+    }    
+    #loader {    
+      text-align: center;    
+      z-index: 2;    
+      transition: opacity 0.5s ease;    
+      position: absolute;    
+      width: 100%;    
+      top: 40%;    
+    }    
+    .spinner {    
+      border: 6px solid #2e2e2e;    
+      border-top: 6px solid #00ffcc;    
+      border-radius: 50%;    
+      width: 60px;    
+      height: 60px;    
+      animation: spin 1s linear infinite;    
+      margin: auto;    
+    }    
+    @keyframes spin {    
+      0% { transform: rotate(0deg); }    
+      100% { transform: rotate(360deg); }    
+    }    
+    .brand {    
+      margin-top: 12px;    
+      font-size: 1.2em;    
+      color: #00ffcc;    
+      text-shadow: 0 0 8px #00ffcc, 0 0 15px #00ffcc;    
+    }    
+    #paymentApp {    
+      z-index: 2;    
+      text-align: center;    
+      position: relative;    
+      padding: 100px 20px 40px;    
+      display: none;    
+    }    
+    .topbar {    
+      position: absolute;    
+      top: 20px;    
+      left: 20px;    
+      display: flex;    
+      align-items: center;    
+      gap: 15px;    
+      flex-wrap: wrap;    
+    }    
+    .topbar img {    
+      width: 60px;    
+      height: 60px;    
+      border-radius: 50%;    
+      border: 2px solid #00ffc3;    
+      box-shadow: 0 0 10px #00ffc3;    
+    }    
+    .topbar .info {    
+      text-align: left;    
+    }    
+    .topbar .info strong {    
+      display: block;    
+      font-size: 1.2em;    
+      color: #00ffcc;    
+    }    
+    .social-links {    
+      margin-top: 6px;    
+      display: flex;    
+      flex-wrap: wrap;    
+      gap: 6px;    
+    }    
+    .btn-social {    
+      display: inline-block;    
+      padding: 6px 14px;    
+      background: linear-gradient(45deg, #00ffcc, #00c8ff);    
+      color: #000;    
+      border-radius: 8px;    
+      font-size: 0.85em;    
+      font-weight: bold;    
+      text-decoration: none;    
+      box-shadow: 0 0 8px #00ffe0, 0 0 12px #00ffe0;    
+      transition: all 0.3s ease;    
+    }    
+    .btn-social:hover {    
+      background: linear-gradient(45deg, #00e6b8, #00b3ff);    
+      transform: scale(1.05);    
+    }    
+    .welcome {    
+      font-size: 1.4em;    
+      margin-bottom: 20px;    
+      color: #ffffff;    
+      font-weight: bold;    
+      text-shadow: 0 0 8px #00ffe0;    
+    }    
+    .card {    
+      background: rgba(28, 28, 28, 0.9);    
+      padding: 30px;    
+      border-radius: 16px;    
+      box-shadow: 0 0 15px #00ffe0;    
+      max-width: 400px;    
+      margin: auto;    
+      margin-bottom: 20px;    
+    }    
+    h1 {    
+      margin-bottom: 10px;    
+      color: #00ffcc;    
+      text-shadow: 0 0 5px #00ffcc, 0 0 10px #00ffcc;    
+    }    
+    .pay-method {    
+      margin: 20px 0;    
+      padding: 15px;    
+      background: #2e2e2e;    
+      border-radius: 12px;    
+      cursor: pointer;    
+      transition: background 0.3s;    
+      position: relative;    
+      box-shadow: 0 0 8px #00ffd5;    
+    }    
+    .pay-method:hover {    
+      background: #3a3a3a;    
+    }    
+    .pay-method h2 {    
+      margin: 0;    
+      font-size: 1.2em;    
+      color: #ffcc00;    
+      text-shadow: 0 0 5px #ffcc00;    
+    }    
+    .pay-method p {    
+      margin: 5px 0 0;    
+      font-size: 1.1em;    
+      font-weight: bold;    
+      user-select: none;    
+      color: #ffffff;    
+      text-shadow: 0 0 5px #ffffff;    
+    }    
+    .copied {    
+      position: absolute;    
+      right: 10px;    
+      top: 10px;    
+      font-size: 0.8em;    
+      color: #00ffcc;    
+      opacity: 0;    
+      transition: opacity 0.3s;    
+    }    
+    .pay-method.copied .copied {    
+      opacity: 1;    
+    }    
+    .footer {    
+      margin-top: 20px;    
+      font-size: 0.9em;    
+      color: #888;    
+      text-shadow: 0 0 4px #ffffff66;    
+    }    
+    .btn-play {    
+      background: #00ffc3;    
+      color: #000;    
+      padding: 10px 20px;    
+      border-radius: 10px;    
+      border: none;    
+      font-weight: bold;    
+      cursor: pointer;    
+      box-shadow: 0 0 10px #00ffc3, 0 0 20px #00ffc3;    
+      transition: 0.3s;    
+    }    
+    .btn-play:hover {    
+      background: #00d6a8;    
+      box-shadow: 0 0 20px #00ffc3;    
+    }    
+  </style>    
+</head>    
+<body>    
+  <div class="lights" id="lights"></div>    
+  <div id="loader">    
+    <div class="spinner"></div>    
+    <div class="brand">Xinz KYX Payment</div>    
+  </div>    <div id="paymentApp">    
+    <div class="topbar">    
+      <img src="https://files.catbox.moe/ohfs4a.jpg" alt="Profil Xinz" />    
+      <div class="info">    
+        <strong>XINZ</strong>    
+        <div class="social-links">    
+          <a class="btn-social" href="https://www.tiktok.com/@xinzz.kyx_009" target="_blank">Tiktok 🔥</a>    
+          <a class="btn-social" href="https://whatsapp.com/channel/0029Vb443EZ0LKZNHdsGyC3c" target="_blank">Saluran 💬</a>    
+        </div>    
+      </div>    
+    </div>  <div class="welcome">WELCOME TO PAYMENT XINZ</div>    <div class="card">    
+  <h1>Bayar ke Xinz</h1>    
+  <div class="pay-method">    
+    <h2>Dana</h2>    
+    <p>0821 3697 5082</p>    
+    <span class="copied">Disalin!</span>    
+  </div>    
+  <div class="pay-method">    
+    <h2>Gopay</h2>    
+    <p>0821 8930 5896</p>    
+    <span class="copied">Disalin!</span>    
+  </div>    
+  <div class="footer">Klik buat salin nomor 😎</div>    
+</div>    <button class="btn-play" onclick="playMusic()">▶️ Play Musik</button>
+<audio id="bg-music" src="https://files.catbox.moe/ixy9sr.mp3"></audio>
+
+<div class="card">    
+  <pre style="white-space: pre-wrap; text-align: left; background: transparent; color: #ffcc00; font-family: 'Courier New', monospace; font-size: 0.95em; text-shadow: 0 0 5px #ffaa00;">❏ [ *PANEL PRIVATE* ] ❏  📦 ANTI DELAY!!
+📦 GARANSI 20 HARI JIKA MOKAD
+📦 SPEK VPS RAM 64 GB 16 CORE
+📦 ANTI RUSUH!
+📦 OWN PANEL,PT PANEL, ADP? BISIK2 DI PM
+
+💸 LIST HARGA PANEL
+
+• RAM 1GB = 3.500
+• RAM 2GB = 4.500
+• RAM 3GB = 5.000
+• RAM 4GB = 6.000
+• RAM 5GB = 7.000
+• RAM 6GB = 8.000
+• RAM 7GB = 9.000
+• RAM 8GB = 10.500
+• RAM 9GB = 11.000
+• RAM 10GB = 12.000
+• RAM UNLI = 15.000
+
+📌 HARGA TERGANTUNG CUACA
+
+👑 Contact owner :
+https://wa.me/6282189305896</pre>
+
+</div>    </div>  <audio id="click-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9ab2c62c9f.mp3?filename=click-124467.mp3"></audio>    <script>    
+    const lightsContainer = document.getElementById("lights");    
+    for (let i = 0; i < 20; i++) {    
+      const dot = document.createElement("div");    
+      dot.className = "light";    
+      dot.style.top = Math.random() * 100 + "%";    
+      dot.style.left = Math.random() * 100 + "%";    
+      dot.style.animationDuration = (1 + Math.random() * 2) + "s";    
+      lightsContainer.appendChild(dot);    
+    }    
+    
+    document.querySelectorAll('.pay-method').forEach(el => {    
+      el.addEventListener('click', () => {    
+        const number = el.querySelector('p').textContent.replace(/\s/g, '');    
+        const tempInput = document.createElement("input");    
+        tempInput.value = number;    
+        document.body.appendChild(tempInput);    
+        tempInput.select();    
+        tempInput.setSelectionRange(0, 99999);    
+        const clickSound = document.getElementById("click-sound");    
+        try {    
+          const success = document.execCommand("copy");    
+          document.body.removeChild(tempInput);    
+          if (success) {    
+            clickSound.play();    
+            el.classList.add('copied');    
+            setTimeout(() => el.classList.remove('copied'), 1500);    
+          } else throw new Error("Gagal");    
+        } catch (err) {    
+          document.body.removeChild(tempInput);    
+          alert("Gagal salin. Coba manual ya 😅");    
+        }    
+      });    
+    });    
+    
+    function playMusic() {    
+      const music = document.getElementById("bg-music");    
+      music.play().catch(() => {    
+        alert("Autoplay diblokir, pencet tombolnya ya!");    
+      });    
+    }    
+    
+    window.onload = () => {    
+      const loader = document.getElementById('loader');    
+      const app = document.getElementById('paymentApp');    
+      const clickSound = document.getElementById('click-sound');    
+      setTimeout(() => {    
+        loader.style.opacity = 0;    
+        clickSound.play();    
+        setTimeout(() => {    
+          loader.style.display = 'none';    
+          app.style.display = 'block';    
+        }, 500);    
+      }, 2000);    
+    }    
+  </script>  </body>    </html> 
